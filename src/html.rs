@@ -37,8 +37,14 @@ where
     Input: Stream<Token = char>,
     Input::Error: ParseError<Input::Token, Input::Range, Input::Position>,
 {
-    todo!("you need to implement this combinator");
-    (char(' ')).map(|_| AttrMap::new())
+    sep_by::<Vec<(String, String)>, _, _, _>(
+        attribute(),
+        many::<String, _, _>(space().or(newline())),   
+    )
+    .map(|attrs: Vec<(String, String)>| {
+        let m: AttrMap = attrs.into_iter().collect();
+        m
+    })
 }
 
 /// `open_tag` consumes `<tag_name attr_name="attr_value" ...>`.
@@ -132,18 +138,18 @@ mod tests {
         )
     }
 
-   // #[test]
-    // fn test_parse_attributes() {
-    //     let mut expected_map = AttrMap::new();
-    //     expected_map.insert("test".to_string(), "foobar".to_string());
-    //     expected_map.insert("abc".to_string(), "def".to_string());
-    //     assert_eq!(
-    //         attributes().parse("test=\"foobar\" abc=\"def\""),
-    //         Ok((expected_map, ""))
-    //     );
+   #[test]
+    fn test_parse_attributes() {
+        let mut expected_map = AttrMap::new();
+        expected_map.insert("test".to_string(), "foobar".to_string());
+        expected_map.insert("abc".to_string(), "def".to_string());
+        assert_eq!(
+            attributes().parse("test=\"foobar\" abc=\"def\""),
+            Ok((expected_map, ""))
+        );
 
-    //     assert_eq!(attributes().parse(""), Ok((AttrMap::new(), "")))
-    // }
+        assert_eq!(attributes().parse(""), Ok((AttrMap::new(), "")))
+    }
 
     // #[test]
     // fn test_parse_open_tag() {
